@@ -986,16 +986,18 @@ button {
 
 .mobile-action-btn {
   position: fixed;
-  right: 38px;
+  right: 28px;
   bottom: 80px;
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
+  min-width: 92px;
+  height: 92px;
+  padding: 0 18px;
+  border-radius: 999px;
   background: linear-gradient(135deg, var(--neon-pink), var(--neon-purple));
   border: 3px solid rgba(255, 255, 255, 0.4);
   color: #fff;
   font-family: var(--font-display);
-  font-size: 28px;
+  font-size: 18px;
+  letter-spacing: 0.08em;
   font-weight: 900;
   z-index: 80;
   box-shadow:
@@ -1004,35 +1006,26 @@ button {
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
   user-select: none;
+  transition: opacity 0.2s, filter 0.2s;
+}
+
+.mobile-action-btn.disabled {
+  opacity: 0.35;
+  filter: grayscale(0.6);
+}
+
+.mobile-action-btn.enabled {
+  opacity: 1;
+  animation: actionPulse 1.6s ease-in-out infinite;
+}
+
+@keyframes actionPulse {
+  0%, 100% { box-shadow: 0 0 30px rgba(255, 46, 154, 0.6), 0 10px 30px rgba(0, 0, 0, 0.6); }
+  50% { box-shadow: 0 0 50px rgba(255, 46, 154, 0.9), 0 10px 30px rgba(0, 0, 0, 0.6); }
 }
 
 .mobile-action-btn:active {
   transform: scale(0.92);
-}
-
-.mobile-jump-btn {
-  position: fixed;
-  right: 38px;
-  bottom: 175px;
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, var(--neon-cyan), #7a4cff);
-  border: 3px solid rgba(255, 255, 255, 0.35);
-  color: #fff;
-  font-family: var(--font-display);
-  font-size: 22px;
-  font-weight: 900;
-  z-index: 80;
-  box-shadow:
-    0 0 20px rgba(0, 225, 255, 0.5),
-    0 8px 24px rgba(0, 0, 0, 0.5);
-  touch-action: manipulation;
-  -webkit-tap-highlight-color: transparent;
-  user-select: none;
-}
-.mobile-jump-btn:active {
-  transform: scale(0.9);
 }
 
 /* =====================================================

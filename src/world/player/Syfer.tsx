@@ -173,24 +173,56 @@ export function Syfer() {
     };
   }, []);
 
-  // Touch: pinch = zoom, single finger on right half = orbit
+  // Touch: pinch = zoom, drag on right half = orbit, quick tap = jump
   useEffect(() => {
     let lastPinchDist = 0;
     let lastTouchX = 0;
     let touchOrbit = false;
+    let tapStartTime = 0;
+    let tapStartX = 0;
+    let tapStartY = 0;
+    let tapCandidate = false;
+
+    const TAP_MAX_DURATION = 220; // ms
+    const TAP_MAX_MOVE = 12; // px
+
+    // Returns true when the touch started on an interactive UI control
+    // (joystick, action button). We want to ignore these for jump/orbit.
+    const touchOnUi = (target: EventTarget | null) => {
+      if (!(target instanceof Element)) return false;
+      return !!target.closest(
+        ".mobile-action-btn, .joystick-zone, .dialogue-root, .terminal-root, .hud-top-left, .hud-top-right, button, input, textarea, a",
+      );
+    };
 
     const onTouchStart = (e: TouchEvent) => {
       if (e.touches.length === 1) {
-        // Single touch on right side of screen = orbit
-        const x = e.touches[0].clientX;
-        if (x > window.innerWidth * 0.4) {
-          touchOrbit = true;
-          lastTouchX = x;
+        const t = e.touches[0];
+        if (touchOnUi(e.target)) {
+          tapCandidate = false;
+          touchOrbit = false;
+          return;
         }
+        // Every single-finger touch is a potential tap-to-jump until proven
+        // otherwise (movement > threshold, duration > threshold, or pinch).
+        tapStartTime = performance.now();
+        tapStartX = t.clientX;
+        tapStartY = t.clientY;
+        tapCandidate = true;
+        // Orbit only when the touch started on the right 40% of the screen.
+        if (t.clientX > window.innerWidth * 0.4) {
+          touchOrbit = true;
+          lastTouchX = t.clientX;
+        } else {
+          touchOrbit = false;
+        }
+      } else {
+        tapCandidate = false;
       }
     };
     const onTouchMove = (e: TouchEvent) => {
       if (e.touches.length === 2) {
+        tapCandidate = false;
         const dx = e.touches[0].clientX - e.touches[1].clientX;
         const dy = e.touches[0].clientY - e.touches[1].clientY;
         const dist = Math.hypot(dx, dy);
@@ -203,14 +235,29 @@ export function Syfer() {
         }
         lastPinchDist = dist;
         touchOrbit = false;
-      } else if (e.touches.length === 1 && touchOrbit) {
-        const x = e.touches[0].clientX;
-        const dx = x - lastTouchX;
-        camAngle.current -= dx * 0.008;
-        lastTouchX = x;
+      } else if (e.touches.length === 1) {
+        const t = e.touches[0];
+        if (tapCandidate) {
+          const moved = Math.hypot(t.clientX - tapStartX, t.clientY - tapStartY);
+          if (moved > TAP_MAX_MOVE) tapCandidate = false;
+        }
+        if (touchOrbit) {
+          const dx = t.clientX - lastTouchX;
+          camAngle.current -= dx * 0.008;
+          lastTouchX = t.clientX;
+        }
       }
     };
-    const onTouchEnd = () => {
+    const onTouchEnd = (e: TouchEvent) => {
+      // Quick tap with minimal movement = jump.
+      if (
+        tapCandidate &&
+        e.touches.length === 0 &&
+        performance.now() - tapStartTime < TAP_MAX_DURATION
+      ) {
+        jumpQueued.current = true;
+      }
+      tapCandidate = false;
       lastPinchDist = 0;
       touchOrbit = false;
     };

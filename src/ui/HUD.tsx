@@ -10,6 +10,7 @@ export function HUD() {
   const visited = useGameStore((s) => s.visitedZones);
   const activeComputer = useGameStore((s) => s.activeComputer);
   const activeNpc = useGameStore((s) => s.activeNpc);
+  const isMobile = useGameStore((s) => s.isMobile);
   const hint = useGameStore((s) => s.hint);
 
   const npc = NPCS.find((n) => n.id === activeNpc);
@@ -68,7 +69,7 @@ export function HUD() {
           <div className="hud-prompt" style={{ borderColor: COMPUTER_OBJECT.accent }}>
             <span style={{ color: COMPUTER_OBJECT.accent }}>💻</span>
             <span className="hud-prompt-title">{COMPUTER_OBJECT.label}</span>
-            <span className="hud-prompt-key">E</span>
+            {!isMobile && <span className="hud-prompt-key">E</span>}
           </div>
         </div>
       ) : npc ? (
@@ -78,7 +79,7 @@ export function HUD() {
             <span className="hud-prompt-title">
               {npc.name} · {npc.topic}
             </span>
-            <span className="hud-prompt-key">E</span>
+            {!isMobile && <span className="hud-prompt-key">E</span>}
           </div>
         </div>
       ) : null}

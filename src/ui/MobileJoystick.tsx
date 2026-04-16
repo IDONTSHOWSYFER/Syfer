@@ -1,10 +1,12 @@
 import { useEffect, useRef } from "react";
 import nipplejs from "nipplejs";
 import { useGameStore } from "../state/gameStore";
+import { NPCS } from "../data/content";
 
 /**
  * Virtual joystick for mobile using nipplejs v1.
- * Also renders an E/interact button and a Jump button on the right side.
+ * Also renders a contextual interact button on the right side.
+ * Jump is handled by a quick tap on the canvas (see Syfer.tsx touch handler).
  */
 type Collection = ReturnType<typeof nipplejs.create>;
 
@@ -14,6 +16,8 @@ export function MobileJoystick() {
   const setMove = useGameStore((s) => s.setMove);
   const triggerInteract = useGameStore((s) => s.triggerInteract);
   const isMobile = useGameStore((s) => s.isMobile);
+  const activeNpc = useGameStore((s) => s.activeNpc);
+  const activeComputer = useGameStore((s) => s.activeComputer);
 
   useEffect(() => {
     if (!isMobile || !zoneRef.current) return;
@@ -47,36 +51,33 @@ export function MobileJoystick() {
 
   if (!isMobile) return null;
 
-  const handleJump = () => {
-    // Dispatch a synthetic Space keydown to trigger jump
-    window.dispatchEvent(
-      new KeyboardEvent("keydown", { code: "Space", key: " ", bubbles: true }),
-    );
-  };
+  // Contextual label for the action button: tells the player what they'll do.
+  let actionLabel = "TAP";
+  let actionEnabled = false;
+  if (activeComputer) {
+    actionLabel = "KNOCK";
+    actionEnabled = true;
+  } else if (activeNpc) {
+    const npc = NPCS.find((n) => n.id === activeNpc);
+    actionLabel = npc ? `TALK` : "TALK";
+    actionEnabled = true;
+  }
 
   return (
     <>
       <div ref={zoneRef} className="joystick-zone" />
-      {/* Jump button */}
+      {/* Contextual interact button */}
       <button
-        className="mobile-jump-btn"
+        className={`mobile-action-btn ${actionEnabled ? "enabled" : "disabled"}`}
         onTouchStart={(e) => {
           e.preventDefault();
-          handleJump();
+          if (actionEnabled) triggerInteract();
+        }}
+        onClick={() => {
+          if (actionEnabled) triggerInteract();
         }}
       >
-        ↑
-      </button>
-      {/* Interact button */}
-      <button
-        className="mobile-action-btn"
-        onTouchStart={(e) => {
-          e.preventDefault();
-          triggerInteract();
-        }}
-        onClick={triggerInteract}
-      >
-        E
+        {actionLabel}
       </button>
     </>
   );
