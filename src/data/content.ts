@@ -463,12 +463,12 @@ export const DECOR_MODELS: DecorModel[] = [
 
 // Convenience quest labels (HUD).
 export const QUEST_OBJECTIVES: Record<ZoneId, string> = {
-  stack: "Visiter la maison ananas",
-  projects: "Visiter la maison ananas",
-  blockchain: "Visiter la maison ananas",
-  business: "Visiter la maison ananas",
-  trading: "Visiter la maison ananas",
-  socials: "Visiter la maison ananas",
+  stack: "Visit the pineapple house",
+  projects: "Visit the pineapple house",
+  blockchain: "Visit the pineapple house",
+  business: "Visit the pineapple house",
+  trading: "Visit the pineapple house",
+  socials: "Visit the pineapple house",
 };
 
 // =============================================================
@@ -498,8 +498,8 @@ export const COMPUTER_OBJECT = {
   position: [5, 0.5, 4] as [number, number, number],
   scale: 0.4,
   interactRadius: 7,
-  label: "Toquer à la porte",
-  hint: "entrer dans la maison ananas",
+  label: "Knock on the door",
+  hint: "enter the pineapple house",
   accent: "#ffffff",
 };
 
